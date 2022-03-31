@@ -41,6 +41,9 @@ class Game:
     # list of player in the positive [name, amount_to_be_paid]
     positive = []
 
+    total_owed = 0
+    total_receive = 0
+
     # players that are even are omitted
 
     def __init__(self, players):
@@ -50,13 +53,19 @@ class Game:
             if player.diff > 0:
                 p = [player.name, player.diff]
                 self.positive.append(p)
+                self.total_owed += player.diff
 
             # if they lost money
             if player.diff < 0:
                 p = [player.name, -player.diff]
                 self.negative.append(p)
+                self.total_receive += -player.diff
 
     def calculate_payments(self):
+        # check if the payments are balanced
+        if self.total_receive != self.total_owed:
+            raise Exception
+
         # sort to try and reduce the number of payments
         self.negative.sort(key=lambda x: x[1])
         self.positive.sort(key=lambda x: x[1])
@@ -67,6 +76,19 @@ class Game:
         i = 0
         # payer
         j = 0
+
+        # to start see if any two players owe each other equal amounts
+        # if that is the case immediately pay them out
+        # for current_payer in self.negative:
+        #     for current_receive in self.positive:
+        #         payer = current_payer[0]
+        #         receiver = current_receive[0]
+        #         owed = current_receive[1]
+        #         to_pay = current_payer[1]
+        #         if to_pay == owed:
+        #             payments.append(Transaction(payer, to_pay, receiver))
+        #             self.negative.remove(current_payer)
+        #             self.positive.remove(current_receive)
 
         # make sure we don't go past the end of a list
         while i < len(self.negative) and j < len(self.positive):
@@ -107,12 +129,14 @@ class Game:
 
 
 if __name__ == "__main__":
-    Jonah = Player(25, "Jonah", 15)
-    Kesh = Player(25, "Kesh", 30)
-    Younes = Player(25, "Younes", 10)
-    Samir = Player(25, "Samir", 60)
-    Josh = Player(50, "Josh", 35)
+    # format (Total Buy-In Amount, Name, Cash Out Amount)
+    Jonah = Player(20, "Jonah", 0)
+    Kesh = Player(20, "Kesh", 30)
+    Younes = Player(20, "Younes", 10)
+    Samir = Player(20, "Samir", 20)
+    Josh = Player(20, "Josh", 40)
 
+    # List of Players
     new_game = Game([Jonah, Kesh, Younes, Samir, Josh])
     transaction = new_game.calculate_payments()
     for t in transaction:
